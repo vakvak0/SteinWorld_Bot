@@ -180,43 +180,6 @@ class Bot:
 
 
 def run_bot():
-
-
-    bot = Bot()
-    bot.start_t1()
-
-    run = True
-    time.sleep(5)
-
-    while run:
-        finished = False
-        if bot.is_bot():
-            entity_cords = bot.get_entity_cords()
-            bot.add_start(bot.bot_cords[0], bot.bot_cords[1])
-            if bot.add_start(bot.bot_cords[0], bot.bot_cords[1]) == 1:
-                if entity_cords:
-                    if bot.add_end(entity_cords[0], entity_cords[1]) == 1:
-                        if bot.start_finding():
-                            path = bot.get_path()
-                            if path:
-                                if bot.move_bot_to_cords(path) == 1:
-                                    bot.clear_path_and_load("Dungeon.txt")
-                                    entity_cords = bot.get_entity_cords()
-                                    if bot.calculate_direction(entity_cords) == entity_cords:
-                                        bot.attack(5)
-                                        finished = True
-                                    else:
-                                        bot.move_bot_to_cords(path)
-
-                                else:
-                                    bot.clear_path_and_load("Dungeon.txt")
-
-        if finished:
-            time.sleep(1)
-        time.sleep(0.1)
-
-
-def run_bot1():
     bot = Bot()
     bot.start_t1()
 
@@ -305,7 +268,5 @@ def run_bot1():
             time.sleep(1)
 
 
-
-
 if __name__ == '__main__':
-    run_bot1()
+    run_bot()
