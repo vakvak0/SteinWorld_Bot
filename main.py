@@ -1,11 +1,6 @@
-import random
 import time
-import queue
 from threading import Thread
 
-import keyboard
-import numpy as np
-import pyautogui
 import win32api
 import win32con
 from pyautogui import *
@@ -16,14 +11,15 @@ import ImageRecognition
 
 
 bot_click_cords = {
-    "right": (1020, 580),
-    "left": (895, 580),
-    "up": (955, 515),
-    "down": (955, 645)
+    "right": (1020, 550),
+    "left": (895, 550),
+    "up": (955, 485),
+    "down": (955, 615)
 }
 room_start_cords = {
     "dungeon": (30, 10)
 }
+
 
 class Bot:
     def __init__(self):
@@ -55,13 +51,14 @@ class Bot:
         y = bot_click_cords[direction][1]
 
         win32api.SetCursorPos((x, y))
+        time.sleep(0.05)
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0)  # Press mouse down
-        time.sleep(0.01)  # Wait for the game to register the click
+        time.sleep(0.05)  # Wait for the game to register the click
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0)  # Release mouse
 
     def attack(self, repeat):
         cords = self.target_location  # Enemy direction in coordinates
-        print(cords)
+        print(f"Attacking: {cords}")
         for i in range(repeat):
             if cords[0] == 1:
                 self.click("left")
@@ -75,7 +72,7 @@ class Bot:
             if cords[1] == -1:
                 self.click("down")
 
-            time.sleep(1.2)
+            time.sleep(1.6)
 
     def start_t1(self):
         if self.t1.is_alive():
@@ -148,8 +145,8 @@ class Bot:
 
     def get_entity_cords(self):
         pixel_cords = ImageRecognition.get_targets()  # Get list of coordinates in pixels
-        cords = []
-        last = 0, 0
+        cords = [0, 0]
+        last_distance = 999
         for x, y in pixel_cords:
 
             x += 22  # correcting image location to entity location
@@ -164,13 +161,17 @@ class Bot:
             x = round(x)   # Round values
             y = round(y)
 
-            x = self.bot_cords[0] - x  # Calculate real coordinates based on player location
-            y = self.bot_cords[1] - y
+            distance = abs(x) + abs(y)  # Calculating manhattan distance between 0, 0 and x, y
 
-            if abs(last[0]) + abs(last[1]) < abs(x) + abs(y):
-                cords = x, y
-            last = x, y
+            if distance < last_distance:  # If distance is less than last distance, change current cords
+                cords[0] = x
+                cords[1] = y
 
+            last_distance = distance
+
+        cords[0] = self.bot_cords[0] - cords[0]  # Calculating real coordinates
+        cords[1] = self.bot_cords[1] - cords[1]
+        print(f"Closest enemy: {cords}")
         return cords
 
     def calculate_direction(self, cords):
@@ -285,7 +286,7 @@ def run_bot1():
 
             while attack:
                 print("Attacking enemy")
-                bot.attack(4)
+                bot.attack(2)
                 finished = True
                 attack = False
 
@@ -298,7 +299,6 @@ def run_bot1():
 
                 finished = False
                 find_target = True
-
                 time.sleep(2)
 
             print("Waiting...")
